@@ -16,7 +16,7 @@
 /* The sidebar menu */
 .sidenav {
   height: 100%; /* Full-height: remove this if you want "auto" height */
-  width: 160px; /* Set the width of the sidebar */
+  width: 200px; /* Set the width of the sidebar */
   position: fixed; /* Fixed Sidebar (stay in place on scroll) */
   z-index: 1; /* Stay on top */
   top: 0; /* Stay at the top */
@@ -224,9 +224,11 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
 <!-- Side navigation -->
 <div class="sidenav">
 <a href='https://b24-g1skro.bitrix24.site/'><center><img src='icon.png' /></center></a><br/><br/>
-  <a href="grievances.jsp">Grievances</a>
-  <a href="disposal.jsp">Disposal(Total)</a>
-  <a href="pending_total.jsp">Pending(Total)</a>
+  <a href="grievances.jsp">Grievance</a>
+  <a href="grievances_flow.jsp">Grievance(Flow)</a>
+  <a href="grievances_metrics.jsp">Grievance(Metrics)</a>
+  <a href="disposal.jsp">Disposal(Metrics)</a>
+  <a href="pending_total.jsp">Pending(Metrics)</a>
   <a href="pending_split.jsp">Pending(Split)</a>
   <a href="trend.jsp">Trend</a>
   <a href="officer.jsp">Officer</a>

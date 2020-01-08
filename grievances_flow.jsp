@@ -1,22 +1,46 @@
 <%@ page import ="java.sql.*" %>
 <%@ page import ="java.util.*" %>
 <%
-		String org=(request.getParameter("org")==null || request.getParameter("org").length()==0)?null:request.getParameter("org");
+		String regno=(request.getParameter("regno")==null || request.getParameter("regno").length()==0)?null:request.getParameter("regno");
 		Connection con=DriverManager.getConnection(  
 		"jdbc:mysql://localhost:3306/darpa","root","");  
    
 		Statement stmt=con.createStatement();  
-		ResultSet rs=stmt.executeQuery("select distinct org_name from monthlydata");
-		if(org==null)org="Central Board of Direct Taxes (Income Tax)";
+		ResultSet rs=stmt.executeQuery("select distinct ministry from grievance order by ministry");
+		if(regno==null)regno="AYUSH/E/2019/00300";
 
 		Statement stmt1=con.createStatement();  
-		ResultSet rs1=stmt1.executeQuery("select concat(month,'-',year),receipts,disposal from monthlydata where org_name='" + org + "'"); 
+		ResultSet rs1=stmt1.executeQuery("select * from grievanceflow where registration_no='" + regno + "'"); 
 
 
 %>
 <html>
 <head>
 <style>
+#grievance {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 80%;
+}
+
+#grievance td, #grievance th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+#grievance tr:nth-child(even){background-color: #f2f2f2;}
+
+#grievance tr:hover {background-color: #ddd;}
+
+#grievance th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #0000aa;
+  color: white;
+}
+
 
 /* The sidebar menu */
 .sidenav {
@@ -74,39 +98,6 @@
       // draws it.
       function drawChart() {
            // Define the chart to be drawn.
-            var data = google.visualization.arrayToDataTable([
-               ['Month-Year', 'Receipts', 'Disposals'],
-			   <%
-					if(rs1 !=null){
-						while(rs1.next()){
-						   out.print("[");
-						   out.print("'" + rs1.getString(1) + "',");
-						   out.print(rs1.getInt(2) + ",");
-						   out.print(rs1.getInt(3) + "],");
-						   out.println();
-						}
-						rs1.close();
-					}   
-			   %>
-               ]);
-
-            var lineoptions = {title: '<%=org%>',  width: 1800,
-        height: 2400,
-		position: 'top',
-        legend: { position: 'top', maxLines: 3 },
-        bar: { groupWidth: '75%' },
-		explorer: { 
-			actions: ['dragToZoom', 'rightClickToReset'],
-			axis: 'horizontal',
-			keepInBounds: true,
-			maxZoomIn: 4.0
-		}
-			}
-
-            // Instantiate and draw the chart.
-            var linechart = new google.visualization.LineChart(document.getElementById('linecontainer'));
-            linechart.draw(data, lineoptions);
-
       }
     </script>
 
@@ -136,30 +127,55 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
 
 <!-- Page content -->
 <div class="main">
-<right><a href="javascript:window.open('trend_help.html','Trend Help');"><img src='help.png' width=20px height=20px align=right /></a></right>
+<right><a href="javascript:window.open('grievances_help.html','Grievances Help');"><img src='help.png' width=20px height=20px align=right /></a></right>
 <center><a href=''><img src='logo.png'/></a></center><br/><br/>
 <center>
-<form method='get' action='trend.jsp' id='frmTrend'>
+<form method='get' action='grievances_flow.jsp' id='frmGrievances'>
 <tr><td  align=center  >   
 
-    <label for="org">Org Name:</label>
-	<select name=org value='' onchange='submit()'>Select Org
-	<%
-		if(rs !=null){
-			while(rs.next()){  
-			   String orgname=rs.getString(1);
-			   out.print("<option value='" + orgname + "' "); 
-			   if(orgname.equals(org))out.print(" selected ");   
-			   out.println(">" + orgname + "</option>");
-			}
-			rs.close();
-		}   
-	%>
-	</select>
+    <label for="regno">Grievance Registration No:</label>
+	<input type='text' name='regno' id='regno' value='AYUSH/E/2019/00300'/>
+	<input type='submit'/>
+</td></tr>
 </form>
 </center>
 <center>
- <div id="linecontainer"></div>
+
+<center><H2> Grievance Flow </H2></center>
+<br/><br/>
+<center>
+<table id="grievance">
+  <tr>
+    <th>RegistrationNo</th>
+	<th>Action Sr No</th>
+    <th>Action Name</th>
+	<th>ActionDate</th>
+    <th>Source Org</th>
+    <th>Dest Org</th>
+    <th>Remarks</th>
+  </tr>
+<%
+
+		if(rs1 !=null){
+			while(rs1.next()){  
+               out.println("<tr>");
+			   out.println("<td width='15%'>" + rs1.getString(1) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getInt(2) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(3) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(4) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(5) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(6) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(7) + "</td>");
+               out.println("</tr>");
+			}
+			rs1.close();
+		}
+		
+%>
+
+ </table>
+ </center>
+
  </center>
  </div>
  </body>

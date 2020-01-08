@@ -1,22 +1,51 @@
 <%@ page import ="java.sql.*" %>
 <%@ page import ="java.util.*" %>
 <%
-
+		String ministry=(request.getParameter("ministry")==null || request.getParameter("ministry").length()==0)?null:request.getParameter("ministry");
 		Connection con=DriverManager.getConnection(  
 		"jdbc:mysql://localhost:3306/darpa","root","");  
    
 		Statement stmt=con.createStatement();  
-		ResultSet rs=stmt.executeQuery("select * from deptdata"); 
+		ResultSet rs=stmt.executeQuery("select distinct ministry from grievance order by ministry");
+		if(ministry==null)ministry="Ministry of Ayush";
+
+		Statement stmt1=con.createStatement();  
+		ResultSet rs1=stmt1.executeQuery("select * from grievance where ministry='" + ministry + "'"); 
+
 
 %>
 <html>
 <head>
 <style>
+#grievance {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 80%;
+}
+
+#grievance td, #grievance th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+#grievance tr:nth-child(even){background-color: #f2f2f2;}
+
+#grievance tr:hover {background-color: #ddd;}
+
+#grievance th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #0000aa;
+  color: white;
+}
+
 
 /* The sidebar menu */
 .sidenav {
   height: 100%; /* Full-height: remove this if you want "auto" height */
-  width: 160px; /* Set the width of the sidebar */
+  width: 200px; /* Set the width of the sidebar */
   position: fixed; /* Fixed Sidebar (stay in place on scroll) */
   z-index: 1; /* Stay on top */
   top: 0; /* Stay at the top */
@@ -69,47 +98,6 @@
       // draws it.
       function drawChart() {
            // Define the chart to be drawn.
-            var data = google.visualization.arrayToDataTable([
-               ['dept_name', 'Grievances'],
-			   <%
-					if(rs !=null){
-						while(rs.next()){
-						   out.print("[");
-						   out.print("'" + rs.getString(1) + "',");
-						   out.print(rs.getInt(2) + "],");
-						   out.println();
-						}
-						rs.close();
-					}   
-			   %>
-               ]);
-
-            var baroptions = {title: 'Grievances',  width: 3200,
-        height: 6400,
-		position: 'top',
-        legend: { position: 'top', maxLines: 3 },
-        bar: { groupWidth: '75%' },
-		explorer: { 
-			actions: ['dragToZoom', 'rightClickToReset'],
-			axis: 'horizontal',
-			keepInBounds: true,
-			maxZoomIn: 4.0
-		}
-			}
-
-            var pieoptions = {title: 'Grievances',  width: 1600,
-        height: 1200,
-		position: 'top',
-        legend: { position: 'top', maxLines: 3 },
-			}
-
-            // Instantiate and draw the chart.
-            var barchart = new google.visualization.BarChart(document.getElementById('barcontainer'));
-            barchart.draw(data, baroptions);
-
-            var piechart = new google.visualization.PieChart(document.getElementById('piecontainer'));
-            piechart.draw(data, pieoptions);
-
       }
     </script>
 
@@ -125,9 +113,11 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
 <!-- Side navigation -->
 <div class="sidenav">
 <a href='https://b24-g1skro.bitrix24.site/'><center><img src='icon.png' /></center></a><br/><br/>
-  <a href="grievances.jsp">Grievances</a>
-  <a href="disposal.jsp">Disposal(Total)</a>
-  <a href="pending_total.jsp">Pending(Total)</a>
+  <a href="grievances.jsp">Grievance</a>
+  <a href="grievances_flow.jsp">Grievance(Flow)</a>
+  <a href="grievances_metrics.jsp">Grievance(Metrics)</a>
+  <a href="disposal.jsp">Disposal(Metrics)</a>
+  <a href="pending_total.jsp">Pending(Metrics)</a>
   <a href="pending_split.jsp">Pending(Split)</a>
   <a href="trend.jsp">Trend</a>
   <a href="officer.jsp">Officer</a>
@@ -137,19 +127,82 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
 
 <!-- Page content -->
 <div class="main">
-<right><a href="javascript:window.open('grievances_help.html','Pending Grievances Help');"><img src='help.png' width=20px height=20px align=right /></a></right>
-<center><a href=''><img src='logo.png'/></a></center>
+<right><a href="javascript:window.open('grievances_help.html','Grievances Help');"><img src='help.png' width=20px height=20px align=right /></a></right>
+<center><a href=''><img src='logo.png'/></a></center><br/><br/>
 <center>
- <div id="barcontainer"></div>
+<form method='get' action='grievances.jsp' id='frmGrievances'>
+<tr><td  align=center  >   
+
+    <label for="ministry">Ministry:</label>
+	<select name=ministry value='' onchange='submit()'>Select Ministry
+	<%
+		if(rs !=null){
+			while(rs.next()){  
+			   String ministryname=rs.getString(1);
+			   out.print("<option value='" + ministryname + "' "); 
+			   if(ministryname.equals(ministry))out.print(" selected ");   
+			   out.println(">" + ministryname + "</option>");
+			}
+			rs.close();
+		}   
+	%>
+	</select>
+</form>
+</center>
+<center>
+
+<center><H2> Grievance List </H2></center>
+<br/><br/>
+<center>
+<table id="grievance">
+  <tr>
+    <th>RegistrationNo</th>
+	<th>Ministry</th>
+    <th>Country</th>
+	<th>State</th>
+    <th>District</th>
+    <th>Text</th>
+    <th>DiaryDate</th>
+    <th>ClosingDate</th>
+	<th>Source</th>
+    <th>Rating</th>
+    <th>Comments</th>
+    <th>RatingDate</th>
+  </tr>
+<%
+
+		if(rs1 !=null){
+			while(rs1.next()){  
+               out.println("<tr>");
+			   out.println("<td width='15%'>" + rs1.getString(1) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(2) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(3) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(4) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(5) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(6) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(7) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(8) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(9) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(10) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(11) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(12) + "</td>");
+               out.println("</tr>");
+			}
+			rs1.close();
+		}
+		
+%>
+
+ </table>
  </center>
-<center>
- <div id="piecontainer"></div>
+
  </center>
  </div>
  </body>
  </html>
  <%
 		stmt.close();
+		stmt1.close();
 		con.close();
  %>
 <%}

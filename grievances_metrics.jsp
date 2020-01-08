@@ -1,17 +1,12 @@
 <%@ page import ="java.sql.*" %>
 <%@ page import ="java.util.*" %>
 <%
-		String org=(request.getParameter("org")==null || request.getParameter("org").length()==0)?null:request.getParameter("org");
+
 		Connection con=DriverManager.getConnection(  
 		"jdbc:mysql://localhost:3306/darpa","root","");  
    
 		Statement stmt=con.createStatement();  
-		ResultSet rs=stmt.executeQuery("select distinct org_name from monthlydata");
-		if(org==null)org="Central Board of Direct Taxes (Income Tax)";
-
-		Statement stmt1=con.createStatement();  
-		ResultSet rs1=stmt1.executeQuery("select concat(month,'-',year),receipts,disposal from monthlydata where org_name='" + org + "'"); 
-
+		ResultSet rs=stmt.executeQuery("select * from deptdata"); 
 
 %>
 <html>
@@ -75,23 +70,22 @@
       function drawChart() {
            // Define the chart to be drawn.
             var data = google.visualization.arrayToDataTable([
-               ['Month-Year', 'Receipts', 'Disposals'],
+               ['dept_name', 'Grievances'],
 			   <%
-					if(rs1 !=null){
-						while(rs1.next()){
+					if(rs !=null){
+						while(rs.next()){
 						   out.print("[");
-						   out.print("'" + rs1.getString(1) + "',");
-						   out.print(rs1.getInt(2) + ",");
-						   out.print(rs1.getInt(3) + "],");
+						   out.print("'" + rs.getString(1) + "',");
+						   out.print(rs.getInt(2) + "],");
 						   out.println();
 						}
-						rs1.close();
+						rs.close();
 					}   
 			   %>
                ]);
 
-            var lineoptions = {title: '<%=org%>',  width: 1800,
-        height: 2400,
+            var baroptions = {title: 'Grievances',  width: 3200,
+        height: 6400,
 		position: 'top',
         legend: { position: 'top', maxLines: 3 },
         bar: { groupWidth: '75%' },
@@ -103,9 +97,18 @@
 		}
 			}
 
+            var pieoptions = {title: 'Grievances',  width: 1600,
+        height: 1200,
+		position: 'top',
+        legend: { position: 'top', maxLines: 3 },
+			}
+
             // Instantiate and draw the chart.
-            var linechart = new google.visualization.LineChart(document.getElementById('linecontainer'));
-            linechart.draw(data, lineoptions);
+            var barchart = new google.visualization.BarChart(document.getElementById('barcontainer'));
+            barchart.draw(data, baroptions);
+
+            var piechart = new google.visualization.PieChart(document.getElementById('piecontainer'));
+            piechart.draw(data, pieoptions);
 
       }
     </script>
@@ -136,37 +139,19 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
 
 <!-- Page content -->
 <div class="main">
-<right><a href="javascript:window.open('trend_help.html','Trend Help');"><img src='help.png' width=20px height=20px align=right /></a></right>
-<center><a href=''><img src='logo.png'/></a></center><br/><br/>
+<right><a href="javascript:window.open('grievances_help.html','Pending Grievances Help');"><img src='help.png' width=20px height=20px align=right /></a></right>
+<center><a href=''><img src='logo.png'/></a></center>
 <center>
-<form method='get' action='trend.jsp' id='frmTrend'>
-<tr><td  align=center  >   
-
-    <label for="org">Org Name:</label>
-	<select name=org value='' onchange='submit()'>Select Org
-	<%
-		if(rs !=null){
-			while(rs.next()){  
-			   String orgname=rs.getString(1);
-			   out.print("<option value='" + orgname + "' "); 
-			   if(orgname.equals(org))out.print(" selected ");   
-			   out.println(">" + orgname + "</option>");
-			}
-			rs.close();
-		}   
-	%>
-	</select>
-</form>
-</center>
+ <div id="barcontainer"></div>
+ </center>
 <center>
- <div id="linecontainer"></div>
+ <div id="piecontainer"></div>
  </center>
  </div>
  </body>
  </html>
  <%
 		stmt.close();
-		stmt1.close();
 		con.close();
  %>
 <%}
