@@ -130,6 +130,7 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
   <a href="pending_total.jsp">Pending(Total)</a>
   <a href="pending_split.jsp">Pending(Split)</a>
   <a href="trend.jsp">Trend</a>
+  <a href="officer.jsp">Officer</a>
   <a href="users.jsp">Users</a>
   <a href="logout.jsp">Logout</a>
 </div>

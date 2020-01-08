@@ -89,7 +89,7 @@ input[type=submit]:hover {
 
 	
 	<div class="container" width='50%'>
-	<left><H4><u>DARPA Login:</u></H4></left>
+	<left><H4><u>DARPG Login:</u></H4></left>
         <form method="post" action="login.jsp">
     <label for="username">Username</label>
     <input type="text" id="uname" name="uname" placeholder="Username"/>

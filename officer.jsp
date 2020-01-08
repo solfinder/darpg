@@ -1,17 +1,46 @@
 <%@ page import ="java.sql.*" %>
 <%@ page import ="java.util.*" %>
 <%
-
+		String ministry=(request.getParameter("ministry")==null || request.getParameter("ministry").length()==0)?null:request.getParameter("ministry");
 		Connection con=DriverManager.getConnection(  
 		"jdbc:mysql://localhost:3306/darpa","root","");  
    
 		Statement stmt=con.createStatement();  
-		ResultSet rs=stmt.executeQuery("select * from deptdata"); 
+		ResultSet rs=stmt.executeQuery("select distinct ministry from officer order by ministry");
+		if(ministry==null)ministry="DARPG";
+
+		Statement stmt1=con.createStatement();  
+		ResultSet rs1=stmt1.executeQuery("select * from officer where ministry='" + ministry + "'"); 
+
 
 %>
 <html>
 <head>
 <style>
+#officer {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 80%;
+}
+
+#officer td, #officer th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+#officer tr:nth-child(even){background-color: #f2f2f2;}
+
+#officer tr:hover {background-color: #ddd;}
+
+#officer th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #0000aa;
+  color: white;
+}
+
 
 /* The sidebar menu */
 .sidenav {
@@ -69,45 +98,6 @@
       // draws it.
       function drawChart() {
            // Define the chart to be drawn.
-            var data = google.visualization.arrayToDataTable([
-               ['dept_name', 'Pending'],
-			   <%
-					if(rs !=null){
-						while(rs.next()){
-						   out.print("[");
-						   out.print("'" + rs.getString(1) + "',");
-						   out.print(rs.getInt(4) + "],");
-						   out.println();
-						}
-						rs.close();
-					}   
-			   %>
-               ]);
-
-        var baroptions = {title: 'Pending',  width: 3200,
-        height: 6400,
-        legend: { position: 'top', maxLines: 3 },
-        bar: { groupWidth: '75%' },
-		explorer: { 
-			actions: ['dragToZoom', 'rightClickToReset'],
-			axis: 'horizontal',
-			keepInBounds: true,
-			maxZoomIn: 4.0
-		}
-		}
-        var pieoptions = {title: 'Pending',  width: 1600,
-        height: 1200,
-        legend: { position: 'top', maxLines: 3 },
-		}
-
-
-            // Instantiate and draw the chart.
-            var barchart = new google.visualization.BarChart(document.getElementById('barcontainer'));
-            barchart.draw(data, baroptions);
-
-            var piechart = new google.visualization.PieChart(document.getElementById('piecontainer'));
-            piechart.draw(data, pieoptions);
-
       }
     </script>
 
@@ -135,20 +125,70 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
 
 <!-- Page content -->
 <div class="main">
-<right><a href="javascript:window.open('pending_help.html','Pending Grievances Help');"><img src='help.png' width=20px height=20px align=right /></a></right>
-<center><a href=''><img src='logo.png'/></a></center>
+<right><a href="javascript:window.open('officer_help.html','Officer Help');"><img src='help.png' width=20px height=20px align=right /></a></right>
+<center><a href=''><img src='logo.png'/></a></center><br/><br/>
 <center>
- <div id="barcontainer"></div>
- </center>
+<form method='get' action='officer.jsp' id='frmOfficer'>
+<tr><td  align=center  >   
+
+    <label for="ministry">Ministry:</label>
+	<select name=ministry value='' onchange='submit()'>Select Ministry
+	<%
+		if(rs !=null){
+			while(rs.next()){  
+			   String ministryname=rs.getString(1);
+			   out.print("<option value='" + ministryname + "' "); 
+			   if(ministryname.equals(ministry))out.print(" selected ");   
+			   out.println(">" + ministryname + "</option>");
+			}
+			rs.close();
+		}   
+	%>
+	</select>
+</form>
+</center>
 <center>
- <div id="piecontainer"></div>
+
+<center><H2> Officer List </H2></center>
+<br/><br/>
+<center>
+<table id="officer">
+  <tr>
+    <th>Designation</th>
+	<th>Level</th>
+    <th>Address1</th>
+	<th>Address2</th>
+    <th>Address3</th>
+    <th>Pincode</th>
+  </tr>
+<%
+
+		if(rs1 !=null){
+			while(rs1.next()){  
+               out.println("<tr>");
+			   out.println("<td width='15%'>" + rs1.getString(9) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getInt(10) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(5) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(6) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(7) + "</td>");
+			   out.println("<td width='15%'>" + rs1.getString(8) + "</td>");
+               out.println("</tr>");
+			}
+			rs1.close();
+		}
+		
+%>
+
+ </table>
  </center>
 
+ </center>
  </div>
  </body>
  </html>
  <%
 		stmt.close();
+		stmt1.close();
 		con.close();
  %>
 <%}
