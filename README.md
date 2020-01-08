@@ -6,6 +6,8 @@ Online hackathon for data driven innovation for citizen grievance redressal
    - officers
    - deptdata
    - monthlydata
+   - grievance
+   - grievanceflow
 2) In the webapps folder of your tomcat environment , reae a new directory called darpg.
 3) Download the contents of this folder to the newly created directory.
 4) Start the tomcat server.
