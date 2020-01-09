@@ -126,6 +126,7 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
 <a href='https://b24-g1skro.bitrix24.site/'><center><img src='icon.png' /></center></a><br/><br/>
   <a href="grievances.jsp">Grievance</a>
   <a href="grievances_flow.jsp">Grievance(Flow)</a>
+  <a href="grievances_nlp.jsp">Grievance(NLP)</a>
   <a href="grievances_metrics.jsp">Grievance(Metrics)</a>
   <a href="disposal.jsp">Disposal(Metrics)</a>
   <a href="pending_total.jsp">Pending(Metrics)</a>
