@@ -82,25 +82,40 @@
   .sidenav a {font-size: 18px;}
 }
 </style>
-
     <!--Load the AJAX API-->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-
-      // Load the Visualization API and the corechart package.
-      google.charts.load('current', {'packages':['corechart']});
-
-      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.load('current', {packages:["orgchart"]});
       google.charts.setOnLoadCallback(drawChart);
-
-      // Callback that creates and populates a data table,
-      // instantiates the pie chart, passes in the data and
-      // draws it.
+	  
       function drawChart() {
-           // Define the chart to be drawn.
-      }
-    </script>
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Org');
+        data.addColumn('string', 'Date');
+        data.addColumn('string', 'ToolTip');
 
+        // For each orgchart box, provide the name, manager, and tooltip to show.
+        data.addRows([
+<%
+		if(rs1 !=null){
+			while(rs1.next()){  
+%>
+          [{'v':'<%= rs1.getString(6) + '_' + rs1.getInt(2)%>', 'f':'<%= rs1.getString(6)%><div style="color:red; font-style:italic"><%= rs1.getString(4)%></div>'},
+           '<%= rs1.getString(5) + '_' + (rs1.getInt(2)-1)%>', '<%= rs1.getString(3)%>'],
+<%
+			}
+			rs1.close();
+		}
+		
+%>
+        ]);
+
+        // Create the chart.
+        var chart = new google.visualization.OrgChart(document.getElementById('flowcontainer'));
+        // Draw the chart, setting the allowHtml option to true for the tooltips.
+        chart.draw(data, {'allowHtml':true});
+      }
+	  </script>
 </head>
 <%
 if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") == "")) {
@@ -156,7 +171,7 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
     <th>Remarks</th>
   </tr>
 <%
-
+		rs1=stmt1.executeQuery("select * from grievanceflow where registration_no='" + regno + "'");
 		if(rs1 !=null){
 			while(rs1.next()){  
                out.println("<tr>");
@@ -176,7 +191,13 @@ if ((session.getAttribute("userid") == null) || (session.getAttribute("userid") 
 
  </table>
  </center>
-
+ <br/>
+ <center><H2> Grievance Flow Graph</H2></center>
+ <br/>
+<center>
+ <div id="flowcontainer"></div>
+ </center>
+<center>
  </center>
  </div>
  </body>
